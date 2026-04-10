@@ -2,6 +2,8 @@
 // Conexão com PostgreSQL e criação automática das tabelas
 
 const { Pool } = require('pg');
+console.log("DATABASE_URL REAL:");
+console.log(process.env.DATABASE_URL);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
