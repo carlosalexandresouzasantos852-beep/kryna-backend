@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kryna — Sua Assistente Virtual do Discord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0c14;
+      --surface: #12131f;
+      --surface2: #1a1c2e;
+      --accent: #c084fc;
+      --accent2: #818cf8;
+      --accent3: #f472b6;
+      --text: #f0f0f8;
+      --muted: #8b8fa8;
+      --border: rgba(192,132,252,0.15);
+      --glow: rgba(192,132,252,0.25);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background mesh ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(129,140,248,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 80%, rgba(192,132,252,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 60% 10%, rgba(244,114,182,0.07) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* noise grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(11,12,20,0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 48px 80px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 720px;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 0 0 60px var(--glow), 0 0 120px rgba(192,132,252,0.1);
+      animation: float 4s ease-in-out infinite;
+    }
+    .img-pequenar {
+      width: 120px;
+      height: 120px;
+      border-radius: 10px;
+    }
+
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(192,132,252,0.1);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 520px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(192,132,252,0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(192,132,252,0.5);
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface);
+      border-color: rgba(192,132,252,0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(192,132,252,0.4);
+    }
+
+    .btn-outline:hover {
+      background: rgba(192,132,252,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* ── Stats strip ── */
+    .stats {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 0 48px 100px;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 28px 48px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      animation: fadeUp 0.9s ease both;
+    }
+
+    .stat-card:first-child {
+      border-left: 1px solid var(--border);
+      border-radius: 12px 0 0 12px;
+    }
+
+    .stat-card:last-child { border-radius: 0 12px 12px 0; }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Features ── */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 52px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .feat-card:hover {
+      border-color: rgba(192,132,252,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    }
+
+    .feat-card:hover::before { opacity: 1; }
+
+    .feat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(192,132,252,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+    }
+
+    .feat-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feat-desc {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 48px 120px;
+      text-align: center;
+    }
+
+    .cta-box {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 64px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(192,132,252,0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-box h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+
+    .cta-box p {
+      color: var(--muted);
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer span {
+      color: var(--accent);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      .stats { padding: 0 20px 60px; flex-wrap: wrap; gap: 1px; }
+      .stat-card { flex: 1; min-width: 120px; padding: 20px 24px; }
+      .stat-card:first-child { border-radius: 12px 0 0 12px; }
+      .section { padding: 60px 20px; }
+      .cta-section { padding: 40px 20px 80px; }
+      .cta-box { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">✦ Kryna</div>
+    <ul class="nav-links">
+      <li><a href="#features">Recursos</a></li>
+      <li><a href="painel.html">Painel</a></li>
+    </ul>
+    <div style="display:flex;gap:10px;">
+      <a href="https://discord.com/oauth2/authorize?client_id=1473146525646590108&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn-secondary" style="padding:9px 18px;font-size:0.85rem;">Me adicione</a>
+      <a href="painel.html" class="btn btn-primary" style="padding:9px 18px;font-size:0.85rem;">Painel de Controle</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-avatar"><img src="kryna.png" class="img-pequenar" alt="Kryna"></div>
+      <div class="hero-badge">✦ Bot de Discord</div>
+      <h1>Olá, eu sou a <span>Kryna</span></h1>
+      <p>Sua assistente virtual do Discord. Moderação inteligente, sistema de experiência, música, casamentos, prêmios e muito mais — tudo em um só lugar.</p>
+      <div class="hero-btns">
+        <a href="https://discord.com/oauth2/authorize?client_id=1473146525646590108&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn btn-primary">💜 Me adicione</a>
+        <a href="#features" class="btn btn-secondary">Saiba mais</a>
+        <a href="painel.html" class="btn btn-outline">Painel de Controle →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card" style="animation-delay:0.1s">
+      <div class="stat-num">500+</div>
+      <div class="stat-label">Servidores</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.2s">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Personalizável</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.3s">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Online</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.4s">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Comandos</div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="section-label">Recursos</div>
+    <h2 class="section-title">Tudo que seu servidor precisa</h2>
+    <p class="section-sub">A Kryna foi criada para ser a assistente completa do seu Discord, com recursos únicos e totalmente configuráveis.</p>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🛡️</div>
+        <div class="feat-title">Moderação Completa</div>
+        <div class="feat-desc">Ban, mute, castigo, avisos, registro de punições e painel de moderação — tudo com comandos de barra intuitivos.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎵</div>
+        <div class="feat-title">Música & Playlists</div>
+        <div class="feat-desc">Toque músicas e playlists direto no canal de voz com suporte a links e comandos simples.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💍</div>
+        <div class="feat-title">Sistema de Casamento</div>
+        <div class="feat-desc">Notificações de casamento, renovação, cartas de amor e muito mais para engajar sua comunidade.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⭐</div>
+        <div class="feat-title">Experiência & Níveis</div>
+        <div class="feat-desc">Sistema de XP completo com notificações de subida de nível e recompensas personalizáveis.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎁</div>
+        <div class="feat-title">Loja & Prêmios</div>
+        <div class="feat-desc">Loja da Crina, recompensas diárias, sorteios com notificação de encerramento automático.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚙️</div>
+        <div class="feat-title">Painel Web Completo</div>
+        <div class="feat-desc">Configure tudo pelo website: prefixos, cargos automáticos, canais, notificações, layout de perfil e muito mais.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <h2>Pronta para entrar no seu servidor?</h2>
+      <p>Adicione a Kryna agora e comece a personalizar a experiência do seu servidor do Discord.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="#" class="btn btn-primary">💜 Adicionar ao Discord</a>
+        <a href="painel.html" class="btn btn-secondary">Acessar Painel</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Feito com 💜 — <span>Kryna</span> · Sua assistente virtual do Discord
+  </footer>
+
+</body>
+</html>

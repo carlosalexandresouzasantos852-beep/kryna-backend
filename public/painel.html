@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kryna — Painel de Controle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0c14;
+      --surface: #12131f;
+      --surface2: #1a1c2e;
+      --surface3: #21233a;
+      --accent: #c084fc;
+      --accent2: #818cf8;
+      --accent3: #f472b6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --text: #f0f0f8;
+      --muted: #8b8fa8;
+      --border: rgba(192,132,252,0.13);
+      --glow: rgba(192,132,252,0.2);
+      --sidebar-w: 250px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      z-index: 50;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+     background-clip: text;
+     -webkit-background-clip: text;
+     -webkit-text-fill-color: transparent;
+    }
+
+    /* User section in sidebar */
+    .sidebar-user {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent3), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-user-info { overflow: hidden; }
+    .sidebar-user-name { font-size: 0.88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-tag  { font-size: 0.75rem; color: var(--muted); }
+
+    /* Nav sections */
+    .nav-section {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-section-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 8px 20px 4px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(192,132,252,0.08);
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+
+    .nav-item-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* Logout */
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 0;
+    }
+
+    .nav-item.danger { color: var(--danger); }
+    .nav-item.danger:hover { background: rgba(248,113,113,0.08); }
+
+    /* ══ MAIN ══ */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .breadcrumb span { color: var(--text); }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 32px;
+    }
+
+    /* ══ VIEWS ══ */
+    .view { display: none; animation: fadeIn 0.25s ease; }
+    .view.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Page title ── */
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .page-header p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+
+    /* ── Stat cards ── */
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+
+    .stat-box-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-box-label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Server list ── */
+    .server-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .server-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .server-card:hover {
+      border-color: rgba(192,132,252,0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+
+    .server-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin: 0 auto 12px;
+    }
+
+    .server-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .server-role { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
+
+    .server-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .server-btn.config {
+      background: rgba(192,132,252,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(192,132,252,0.25);
+    }
+
+    .server-btn.config:hover { background: rgba(192,132,252,0.2); }
+
+    .server-btn.add {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .server-btn.add:hover { color: var(--text); border-color: rgba(192,132,252,0.25); }
+
+    /* ── Toggle switch ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-row:last-child { border-bottom: none; }
+
+    .toggle-info { flex: 1; }
+    .toggle-label { font-size: 0.9rem; font-weight: 500; }
+    .toggle-desc  { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-track {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--surface3);
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      left: 4px; top: 3px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track {
+      background: rgba(192,132,252,0.25);
+      border-color: rgba(192,132,252,0.5);
+    }
+
+    .toggle input:checked + .toggle-track::before {
+      transform: translateX(19px);
+      background: var(--accent);
+    }
+
+    /* ── Form controls ── */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: rgba(192,132,252,0.45);
+    }
+
+    .form-input::placeholder { color: var(--muted); }
+
+    /* ── Prefix preview ── */
+    .prefix-preview {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+      align-items: flex-start;
+    }
+
+    .chat-bubble {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      flex: 1;
+    }
+
+    .chat-bubble .user-msg { color: var(--accent2); }
+    .chat-bubble .bot-msg  { color: var(--success); margin-top: 6px; }
+    .chat-bubble .name     { font-size: 0.7rem; color: var(--muted); margin-bottom: 2px; }
+
+    /* ── Tags input ── */
+    .tags-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 46px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(192,132,252,0.12);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(192,132,252,0.25);
+    }
+
+    .tag-remove {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+
+    .tag-remove:hover { opacity: 1; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(192,132,252,0.06);
+    }
+
+    tr:hover td { background: rgba(192,132,252,0.03); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-size: 0.73rem;
+      font-weight: 600;
+    }
+
+    .badge-purple { background: rgba(192,132,252,0.12); color: var(--accent); }
+    .badge-green  { background: rgba(52,211,153,0.12); color: var(--success); }
+    .badge-red    { background: rgba(248,113,113,0.12); color: var(--danger); }
+    .badge-yellow { background: rgba(251,191,36,0.12); color: var(--warning); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(192,132,252,0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(192,132,252,0.4); }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { border-color: rgba(192,132,252,0.3); }
+
+    .btn-danger {
+      background: rgba(248,113,113,0.1);
+      color: var(--danger);
+      border: 1px solid rgba(248,113,113,0.2);
+    }
+
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+    /* ── Section divider ── */
+    .sec-divider {
+      margin: 28px 0 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Server config nav ── */
+    .server-subnav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .subnav-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      transition: all 0.15s;
+    }
+
+    .subnav-btn:hover { color: var(--text); border-color: rgba(192,132,252,0.25); }
+    .subnav-btn.active { background: rgba(192,132,252,0.1); color: var(--accent); border-color: rgba(192,132,252,0.35); }
+
+    /* ── API key ── */
+    .api-key-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      word-break: break-all;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      transform: translateY(16px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 24px; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+    /* ── Profile layout picker ── */
+    .layout-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 12px; }
+
+    .layout-opt {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .layout-opt:hover { border-color: rgba(192,132,252,0.35); color: var(--text); }
+    .layout-opt.selected { border-color: var(--accent); color: var(--accent); background: rgba(192,132,252,0.07); }
+
+    .layout-opt-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+    /* ── Color swatch ── */
+    .color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+    .color-swatch {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.15s;
+      border: 2px solid transparent;
+    }
+
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: #fff; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(192,132,252,0.2); border-radius: 100px; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+    .img-pequenar { width: 100%; height: auto; }
+    
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><img src="kryna.png" class="img-pequenar" alt="Kryna"></div>
+    <div class="sidebar-logo-text">Kryna</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="sidebar-user-avatar">😊</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">MeuUsuário</div>
+      <div class="sidebar-user-tag">#0001</div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-section">
+      <div class="nav-section-label">Principal</div>
+      <div class="nav-item active" data-view="servidores">
+        <span class="nav-item-icon">🏠</span> Seus Servidores
+      </div>
+      <div class="nav-item" data-view="loja">
+        <span class="nav-item-icon">🛒</span> Loja
+      </div>
+      <div class="nav-item" data-view="premios">
+        <span class="nav-item-icon">🎁</span> Prêmios Pessoais
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Configurações</div>
+      <div class="nav-item" data-view="personalizacao">
+        <span class="nav-item-icon">🎨</span> Personalização
+      </div>
+      <div class="nav-item" data-view="notificacoes">
+        <span class="nav-item-icon">🔔</span> Notificações
+      </div>
+      <div class="nav-item" data-view="layout">
+        <span class="nav-item-icon">🖼️</span> Layout do Perfil
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Conta</div>
+      <div class="nav-item" data-view="reputacoes">
+        <span class="nav-item-icon">⭐</span> Reputações
+      </div>
+      <div class="nav-item" data-view="api">
+        <span class="nav-item-icon">🔑</span> API
+      </div>
+      <div class="nav-item" data-view="diretrizes">
+        <span class="nav-item-icon">📋</span> Diretrizes da Comunidade
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="nav-item danger" onclick="location.href='index.html'">
+      <span class="nav-item-icon">🚪</span> Sair
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Seus Servidores</div>
+      <div class="breadcrumb">Crina <span>/ Painel</span></div>
+    </div>
+    <a href="index.html" class="btn btn-ghost btn-sm">← Voltar ao site</a>
+  </header>
+
+  <div class="content">
+
+    <!-- ══ VIEW: SERVIDORES ══ -->
+    <div class="view active" id="view-servidores">
+      <div class="page-header">
+        <h1>Seus Servidores</h1>
+        <p>Escolha um servidor para configurar a Kryna.</p>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:24px;">
+        <div class="stat-box">
+          <div class="stat-box-num">12</div>
+          <div class="stat-box-label">Servidores configuráveis</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-num">22</div>
+          <div class="stat-box-label">Aguardando adição</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-num">34</div>
+          <div class="stat-box-label">Total de servidores</div>
+        </div>
+      </div>
+
+      <div class="server-grid" id="server-grid">
+        <!-- gerado via JS -->
+      </div>
+    </div>
+
+    <!-- ══ VIEW: CONFIG SERVIDOR ══ -->
+    <div class="view" id="view-servidor-config">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <button class="btn btn-ghost btn-sm" onclick="goBack()">← Voltar ao painel</button>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;" id="config-server-name">Servidor</div>
+          <div style="font-size:0.8rem;color:var(--muted);">Configurações gerais</div>
+        </div>
+      </div>
+
+      <div class="server-subnav" id="server-subnav">
+        <button class="subnav-btn active" data-sub="visao-geral">📊 Visão Geral</button>
+        <button class="subnav-btn" data-sub="comandos">💬 Comandos</button>
+        <button class="subnav-btn" data-sub="prefixo">🔧 Prefixo</button>
+        <button class="subnav-btn" data-sub="comunidade">🌐 Comunidade</button>
+        <button class="subnav-btn" data-sub="moderacao">🛡️ Moderação</button>
+        <button class="subnav-btn" data-sub="experiencia">⭐ Experiência</button>
+        <button class="subnav-btn" data-sub="premios-sv">🎁 Prêmios</button>
+        <button class="subnav-btn" data-sub="auditoria">📋 Auditoria</button>
+      </div>
+
+      <!-- Sub: Visão Geral -->
+      <div class="sub-view active" id="sub-visao-geral">
+        <div class="grid-3" style="margin-bottom:20px;">
+          <div class="stat-box"><div class="stat-box-num">1.2k</div><div class="stat-box-label">Membros</div></div>
+          <div class="stat-box"><div class="stat-box-num">47</div><div class="stat-box-label">Canais</div></div>
+          <div class="stat-box"><div class="stat-box-num">12</div><div class="stat-box-label">Cargos</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">ℹ️ Informações do Servidor</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Nome</label>
+              <input class="form-input" value="Meu Servidor Top" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Região</label>
+              <select class="form-select">
+                <option>Brasil</option>
+                <option>EUA</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm">Salvar</button>
+        </div>
+      </div>
+
+      <!-- Sub: Comandos -->
+      <div class="sub-view" id="sub-comandos" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">📂 Comandos de Barra</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Comando</th>
+                  <th>Descrição</th>
+                  <th>Permissão</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="slash-commands-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🚫 Canais de Comando Bloqueados</div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">Selecione os canais onde nenhum comando pode ser utilizado.</p>
+          <div class="tags-box" id="blocked-channels">
+            <span class="tag">#geral <span class="tag-remove" onclick="removeTag(this)">✕</span></span>
+            <span class="tag">#off-topic <span class="tag-remove" onclick="removeTag(this)">✕</span></span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <select class="form-select" style="width:auto;flex:1;" id="channel-select">
+              <option>Selecionar canal...</option>
+              <option>#announcements</option>
+              <option>#memes</option>
+              <option>#música</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="addChannel()">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub: Prefixo -->
+      <div class="sub-view" id="sub-prefixo" style="display:none;">
+        <div class="card">
+          <div class="card-title">🔧 Configuração de Prefixo</div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px;">O prefixo é o caractere que vem antes do comando. Por padrão é <strong>!</strong>.</p>
+          <div class="form-group">
+            <label class="form-label">Prefixo atual</label>
+            <input class="form-input" id="prefix-input" value="!" style="max-width:120px;" oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prévia do comando</label>
+            <div class="prefix-preview">
+              <div class="chat-bubble">
+                <div class="name">Você</div>
+                <div class="user-msg"><span id="preview-prefix">!</span>ping</div>
+                <div class="name" style="margin-top:8px;">🌸 Kryna</div>
+                <div class="bot-msg">🏓 Pong! Latência: 32ms</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-divider">📝 Comandos Personalizados</div>
+          <div id="custom-commands-list"></div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="addCustomCommand()">+ Novo comando</button>
+          <button class="btn btn-primary btn-sm" style="margin-left:8px;">Salvar tudo</button>
+        </div>
+      </div>
+
+      <!-- Sub: Comunidade -->
+      <div class="sub-view" id="sub-comunidade" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">👋 Entrada de Membros</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Ativar mensagem de entrada</div>
+              <div class="toggle-desc">Envia boas-vindas quando alguém entra no servidor</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          </div>
+          <div class="grid-2" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label">Canal de entrada</label>
+              <select class="form-select"><option>#boas-vindas</option><option>#geral</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apagar após (segundos)</label>
+              <input class="form-input" type="number" value="0" placeholder="0 = nunca apaga"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">👋 Saída de Membros</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Ativar mensagem de saída</div>
+              <div class="toggle-desc">Notifica quando alguém sai do servidor</div>
+            </div>
+            <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+          </div>
+          <div class="grid-2" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label">Canal de saída</label>
+              <select class="form-select"><option>#logs</option><option>#geral</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apagar após (segundos)</label>
+              <input class="form-input" type="number" value="0" placeholder="0 = nunca apaga"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">🎭 Cargo Automático</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Dar cargo ao entrar</div>
+              <div class="toggle-desc">Cargo concedido automaticamente na entrada</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          </div>
+          <div class="grid-2" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label">Cargo</label>
+              <select class="form-select"><option>Membro</option><option>Visitante</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Após mensagem? (seg)</label>
+              <input class="form-input" type="number" value="0" placeholder="0 = imediato"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Contador de Membros</div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">Canais configurados para exibir contagem de membros.</p>
+          <div id="member-counter-list">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <select class="form-select"><option>📊 Membros: {count}</option></select>
+              <button class="btn btn-ghost btn-sm">✕</button>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="addMemberCounter()">+ Adicionar canal</button>
+          <button class="btn btn-primary btn-sm" style="margin-left:8px;">Salvar</button>
+        </div>
+      </div>
+
+      <!-- Sub: Moderação -->
+      <div class="sub-view" id="sub-moderacao" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">🛡️ Configurações de Moderação</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Bloquear convites externos</div>
+              <div class="toggle-desc">Impede envio de links de convite de outros servidores</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Registro de eventos</div>
+              <div class="toggle-desc">Loga edições, exclusões e eventos do servidor</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Punições por aviso</div>
+              <div class="toggle-desc">Aplicar punições automáticas ao acumular avisos</div>
+            </div>
+            <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 Registro de Punições</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Usuário</th><th>Tipo</th><th>Motivo</th><th>Data</th><th>Ações</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>@usuario123</td>
+                  <td><span class="badge badge-yellow">⚠️ Aviso</span></td>
+                  <td>Spam no chat</td>
+                  <td>09/04/2026</td>
+                  <td><button class="btn btn-ghost btn-sm">Ver</button></td>
+                </tr>
+                <tr>
+                  <td>@troll_user</td>
+                  <td><span class="badge badge-red">🔇 Mute</span></td>
+                  <td>Linguagem inapropriada</td>
+                  <td>08/04/2026</td>
+                  <td><button class="btn btn-ghost btn-sm">Ver</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub: Experiência -->
+      <div class="sub-view" id="sub-experiencia" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">⭐ Sistema de XP</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Ativar sistema de experiência</div>
+              <div class="toggle-desc">Usuários ganham XP ao enviar mensagens</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+          </div>
+          <div class="grid-2" style="margin-top:16px;">
+            <div class="form-group">
+              <label class="form-label">XP por mensagem</label>
+              <input class="form-input" type="number" value="15"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cooldown (seg)</label>
+              <input class="form-input" type="number" value="60"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Canal de notificação de nível</label>
+              <select class="form-select"><option>#geral</option><option>#níveis</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Multiplicador de XP</label>
+              <input class="form-input" type="number" value="1" step="0.1"/>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm">Salvar</button>
+        </div>
+      </div>
+
+      <!-- Sub: Prêmios Servidor -->
+      <div class="sub-view" id="sub-premios-sv" style="display:none;">
+        <div class="card">
+          <div class="card-title">🎁 Prêmios do Servidor</div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Cadastre prêmios que os membros podem ganhar neste servidor.</p>
+          <div id="premios-sv-list">
+            <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+              <input class="form-input" value="Cargo VIP" style="flex:2;"/>
+              <input class="form-input" value="500 pts" style="flex:1;"/>
+              <button class="btn btn-danger btn-sm">✕</button>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="addPremio()">+ Novo prêmio</button>
+          <button class="btn btn-primary btn-sm" style="margin-left:8px;">Salvar</button>
+        </div>
+      </div>
+
+      <!-- Sub: Auditoria -->
+      <div class="sub-view" id="sub-auditoria" style="display:none;">
+        <div class="card">
+          <div class="card-title">📋 Registro de Auditoria</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Ação</th><th>Usuário</th><th>Detalhes</th><th>Data/Hora</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge badge-purple">Configuração</span></td>
+                  <td>@admin</td>
+                  <td>Alterou prefixo para !</td>
+                  <td>09/04/2026 14:32</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-red">Punição</span></td>
+                  <td>@mod1</td>
+                  <td>Mutou @usuario por spam</td>
+                  <td>09/04/2026 13:10</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-green">Entrada</span></td>
+                  <td>@novomembro</td>
+                  <td>Entrou no servidor</td>
+                  <td>09/04/2026 11:05</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: LOJA ══ -->
+    <div class="view" id="view-loja">
+      <div class="page-header"><h1>🛒 Loja da Kryna</h1><p>Compre itens e recompensas com seus pontos.</p></div>
+      <div class="grid-3" style="margin-bottom:20px;">
+        <div class="stat-box"><div class="stat-box-num">2.500</div><div class="stat-box-label">Seus pontos</div></div>
+        <div class="stat-box"><div class="stat-box-num">8</div><div class="stat-box-label">Itens disponíveis</div></div>
+        <div class="stat-box"><div class="stat-box-num">3</div><div class="stat-box-label">Itens comprados</div></div>
+      </div>
+      <div class="sec-divider">🎁 Recompensas Diárias</div>
+      <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:20px;">
+        <div style="font-size:2.5rem;">🎀</div>
+        <div style="flex:1">
+          <div style="font-weight:600;margin-bottom:4px;">Recompensa Diária</div>
+          <div style="color:var(--muted);font-size:0.85rem;">Colete seus pontos diários. Próxima coleta disponível em 18h.</div>
+        </div>
+        <button class="btn btn-primary">Coletar</button>
+      </div>
+      <div class="sec-divider">🏪 Itens da Loja</div>
+      <div class="grid-3">
+        <div class="card" style="text-align:center;">
+          <div style="font-size:2rem;margin-bottom:10px;">🎭</div>
+          <div style="font-weight:600;margin-bottom:4px;">Moldura Especial</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-bottom:14px;">Personaliza sua moldura no perfil</div>
+          <div style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px;">500 pts</div>
+          <button class="btn btn-primary btn-sm" style="width:100%;">Comprar</button>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div style="font-size:2rem;margin-bottom:10px;">🌟</div>
+          <div style="font-weight:600;margin-bottom:4px;">Boost de XP</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-bottom:14px;">2x XP por 24 horas</div>
+          <div style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px;">800 pts</div>
+          <button class="btn btn-primary btn-sm" style="width:100%;">Comprar</button>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div style="font-size:2rem;margin-bottom:10px;">💎</div>
+          <div style="font-weight:600;margin-bottom:4px;">VIP Mensal</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-bottom:14px;">Acesso VIP por 30 dias</div>
+          <div style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px;">3.000 pts</div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;">Insuficiente</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: PRÊMIOS PESSOAIS ══ -->
+    <div class="view" id="view-premios">
+      <div class="page-header"><h1>🎁 Prêmios Pessoais</h1><p>Seus prêmios acumulados nos servidores.</p></div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Prêmio</th><th>Servidor</th><th>Data</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>🥇 Cargo VIP</td><td>Meu Servidor Top</td><td>08/04/2026</td><td><span class="badge badge-green">✓ Recebido</span></td></tr>
+              <tr><td>💰 500 Coins</td><td>Anime Central</td><td>05/04/2026</td><td><span class="badge badge-yellow">⏳ Pendente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: PERSONALIZAÇÃO ══ -->
+    <div class="view" id="view-personalizacao">
+      <div class="page-header"><h1>🎨 Personalização</h1><p>Configure a aparência do seu painel e perfil público.</p></div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">🖼️ Banner do Painel</div>
+        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Personalize o banner exibido na sua página de perfil pública.</p>
+        <div class="form-group">
+          <label class="form-label">URL da imagem do banner</label>
+          <input class="form-input" placeholder="https://i.imgur.com/seu-banner.png"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cor de destaque</label>
+          <div class="color-row">
+            <div class="color-swatch selected" style="background:#c084fc;" onclick="selectColor(this)"></div>
+            <div class="color-swatch" style="background:#818cf8;" onclick="selectColor(this)"></div>
+            <div class="color-swatch" style="background:#f472b6;" onclick="selectColor(this)"></div>
+            <div class="color-swatch" style="background:#34d399;" onclick="selectColor(this)"></div>
+            <div class="color-swatch" style="background:#fbbf24;" onclick="selectColor(this)"></div>
+            <div class="color-swatch" style="background:#f87171;" onclick="selectColor(this)"></div>
+            <div class="color-swatch" style="background:#38bdf8;" onclick="selectColor(this)"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm">Salvar</button>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: NOTIFICAÇÕES ══ -->
+    <div class="view" id="view-notificacoes">
+      <div class="page-header"><h1>🔔 Notificações</h1><p>Escolha quais notificações deseja receber da Crina.</p></div>
+      <div class="card">
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Lembrete de Reputação</div><div class="toggle-desc">Avisa quando você pode dar reputação novamente</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Notificação de Casamento</div><div class="toggle-desc">Quando alguém te pede em casamento</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Casamento Encerrado</div><div class="toggle-desc">Quando seu casamento é desfeito</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Falta de Afinidade</div><div class="toggle-desc">Aviso de que a afinidade está baixa</div></div>
+          <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Casamento Renovado</div><div class="toggle-desc">Quando o casamento é renovado</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Cartinha de Amor</div><div class="toggle-desc">Quando você recebe uma carta de amor</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Subida de Nível</div><div class="toggle-desc">Notifica ao subir de nível de XP</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Encerramento de Sorteio</div><div class="toggle-desc">Avisa quando um sorteio que você participou encerra</div></div>
+          <label class="toggle"><input type="checkbox" /><span class="toggle-track"></span></label>
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-top:16px;">Salvar preferências</button>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: LAYOUT DO PERFIL ══ -->
+    <div class="view" id="view-layout">
+      <div class="page-header"><h1>🖼️ Layout do Perfil</h1><p>Escolha como seu perfil público aparece.</p></div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">📐 Predefinição de Layout</div>
+        <div class="layout-grid">
+          <div class="layout-opt selected" onclick="selectLayout(this)">
+            <div class="layout-opt-icon">🗂️</div>
+            <div>Padrão</div>
+          </div>
+          <div class="layout-opt" onclick="selectLayout(this)">
+            <div class="layout-opt-icon">🎴</div>
+            <div>Cartão</div>
+          </div>
+          <div class="layout-opt" onclick="selectLayout(this)">
+            <div class="layout-opt-icon">📱</div>
+            <div>Compacto</div>
+          </div>
+          <div class="layout-opt" onclick="selectLayout(this)">
+            <div class="layout-opt-icon">🌅</div>
+            <div>Banner Full</div>
+          </div>
+          <div class="layout-opt" onclick="selectLayout(this)">
+            <div class="layout-opt-icon">✨</div>
+            <div>Animado</div>
+          </div>
+          <div class="layout-opt" onclick="selectLayout(this)">
+            <div class="layout-opt-icon">🎭</div>
+            <div>Minimalista</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">👁️ Campos visíveis</div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Exibir nível de XP</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-track"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Exibir reputação</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-track"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Exibir estado de casamento</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-track"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Exibir prêmios</div></div><label class="toggle"><input type="checkbox"/><span class="toggle-track"></span></label></div>
+        <button class="btn btn-primary btn-sm" style="margin-top:16px;">Salvar layout</button>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: REPUTAÇÕES ══ -->
+    <div class="view" id="view-reputacoes">
+      <div class="page-header"><h1>⭐ Reputações</h1><p>Veja quem te deu reputação e sua lista.</p></div>
+      <div class="grid-2" style="margin-bottom:20px;">
+        <div class="stat-box"><div class="stat-box-num">127</div><div class="stat-box-label">Reputações recebidas</div></div>
+        <div class="stat-box"><div class="stat-box-num">89</div><div class="stat-box-label">Reputações dadas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Lista de Reputações Recebidas</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Usuário</th><th>Servidor</th><th>Data</th></tr></thead>
+            <tbody>
+              <tr><td>@amigo1</td><td>Meu Servidor Top</td><td>09/04/2026</td></tr>
+              <tr><td>@sakura_chan</td><td>Anime Central</td><td>08/04/2026</td></tr>
+              <tr><td>@joaozinho</td><td>Dev Hub</td><td>07/04/2026</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: API ══ -->
+    <div class="view" id="view-api">
+      <div class="page-header"><h1>🔑 API</h1><p>Gerencie suas chaves de acesso à API da Crina.</p></div>
+      <div class="card">
+        <div class="card-title">🗝️ Sua Chave de API</div>
+        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Use esta chave para integrar a Kryna com outros serviços. Não compartilhe com ninguém.</p>
+        <div class="api-key-box">
+          <span id="api-key-val">kryna_sk_●●●●●●●●●●●●●●●●●●●●●●●●</span>
+          <button class="btn btn-ghost btn-sm" onclick="toggleApiKey()">👁️ Mostrar</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button class="btn btn-ghost btn-sm" onclick="copyApiKey()">📋 Copiar</button>
+          <button class="btn btn-danger btn-sm" onclick="regenApiKey()">🔄 Gerar nova chave</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: DIRETRIZES ══ -->
+    <div class="view" id="view-diretrizes">
+      <div class="page-header"><h1>📋 Diretrizes da Comunidade</h1><p>Leia as regras de uso da Crina.</p></div>
+      <div class="card">
+        <p style="color:var(--muted);line-height:1.8;font-size:0.9rem;">
+          Ao utilizar a Kryna, você concorda em respeitar todos os membros das comunidades onde o bot está presente.<br><br>
+          <strong style="color:var(--text);">1. Uso adequado:</strong> Não utilize os comandos para assediar, ofender ou prejudicar outros membros.<br><br>
+          <strong style="color:var(--text);">2. Moderação:</strong> Os recursos de moderação devem ser usados de forma justa e responsável por administradores.<br><br>
+          <strong style="color:var(--text);">3. API:</strong> Não compartilhe sua chave de API e não utilize a API para atividades automatizadas abusivas.<br><br>
+          <strong style="color:var(--text);">4. Conteúdo:</strong> Não configure a Kryna para enviar ou moderar conteúdo ilegal, ofensivo ou impróprio.<br><br>
+          <strong style="color:var(--text);">5. Privacidade:</strong> Respeite a privacidade dos usuários ao configurar logs e registros de eventos.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ══ MODAL: Adicionar Kryna ══ -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-title">🌸 Adicione a Kryna</div>
+    <div class="modal-sub">A Kryna ainda não está neste servidor. Adicione-a para começar a configurar!</div>
+    <p style="font-size:0.88rem;color:var(--muted);">Servidor selecionado: <strong id="modal-server-name" style="color:var(--text);">—</strong></p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="addBot()">💜 Adicionar ao Discord</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+<script src="/js/painel.js"></script>
+</body>
+</html>
