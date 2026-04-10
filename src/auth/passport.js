@@ -11,7 +11,7 @@ passport.use(new DiscordStrategy(
   {
     clientID:     process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
-    callbackURL: "https://kryna.onrender.com/auth/discord/callback", // Atualizado para o URL de callback correto
+    callbackURL: "https://kryna-backend.onrender.com/auth/discord/callback", // Atualizado para o URL de callback correto
     scope:        SCOPES
   },
   async (accessToken, refreshToken, profile, done) => {
