@@ -4,12 +4,7 @@
 require('dotenv').config();
 
 const express       = require('express');
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}));
-
+const session       = require('express-session');
 const PgSession     = require('connect-pg-simple')(session);
 const passport      = require('./auth/passport');
 const helmet        = require('helmet');
@@ -25,16 +20,17 @@ const guildRoutes  = require('./routes/guilds');
 const configRoutes = require('./routes/config');
 const userRoutes   = require('./routes/user');
 
+// ✅ CRIA O APP PRIMEIRO (ESSENCIAL)
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Segurança ────────────────────────────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: false // desativa para facilitar o carregamento do painel HTML
+  contentSecurityPolicy: false
 }));
 
 app.use(cors({
-  origin:      process.env.DASHBOARD_URL,
+  origin: process.env.DASHBOARD_URL || "*",
   credentials: true
 }));
 
@@ -49,8 +45,8 @@ app.use(session({
     tableName: 'session',
     createTableIfMissing: false
   }),
-  secret:            process.env.SESSION_SECRET,
-  resave:            false,
+  secret: process.env.SESSION_SECRET || "fallback_secret",
+  resave: false,
   saveUninitialized: false,
   cookie: {
     maxAge:   7 * 24 * 60 * 60 * 1000, // 7 dias
@@ -64,26 +60,30 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ── Arquivos estáticos (seus HTML/CSS) ───────────────────────────────────────
+// ── Arquivos estáticos ───────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ── Rotas da API ─────────────────────────────────────────────────────────────
-app.use('/auth',                    authRoutes);
-app.use('/api/guilds',              guildRoutes);
+app.use('/auth', authRoutes);
+app.use('/api/guilds', guildRoutes);
 app.use('/api/guilds/:guildId/config', configRoutes);
-app.use('/api/user',                userRoutes);
+app.use('/api/user', userRoutes);
 
-// ── Health check (Discloud usa isso para saber se está online) ───────────────
+// ── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', bot: 'Crina', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    bot: 'Crina',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// ── Rota fallback → serve o painel HTML ──────────────────────────────────────
+// ── Fallback (SPA / painel) ──────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// ── Inicia banco, bot e servidor ─────────────────────────────────────────────
+// ── Inicialização ────────────────────────────────────────────────────────────
 async function start() {
   try {
     await initDatabase();
@@ -91,12 +91,13 @@ async function start() {
 
     app.listen(PORT, () => {
       console.log(`\n╔══════════════════════════════════════╗`);
-      console.log(`║   🌸 Crina Dashboard rodando!         ║`);
-      console.log(`║   URL: http://localhost:${PORT}          ║`);
+      console.log(`║   🌸 Crina Dashboard rodando!       ║`);
+      console.log(`║   URL: https://seu-app.onrender.com ║`);
       console.log(`╚══════════════════════════════════════╝\n`);
     });
+
   } catch (err) {
-    console.error('[SERVER] Erro fatal ao iniciar:', err.message);
+    console.error('[SERVER] Erro fatal ao iniciar:', err);
     process.exit(1);
   }
 }
