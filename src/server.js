@@ -1,5 +1,5 @@
 // src/server.js
-// Servidor principal da Crina Dashboard (CORRIGIDO)
+// Servidor principal da Kryna Dashboard (CORRIGIDO)
 
 require("dotenv").config();
 
@@ -24,12 +24,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* =========================
-   🔥 PROXY (RENDER OBRIGATÓRIO)
+   PROXY (OBRIGATÓRIO NO RENDER)
 ========================= */
 app.set("trust proxy", 1);
 
 /* =========================
-   🔐 SEGURANÇA
+   SEGURANÇA
 ========================= */
 app.use(helmet({
   contentSecurityPolicy: false
@@ -47,7 +47,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* =========================
-   🔑 SESSÃO (CRÍTICO PARA DISCORD OAUTH)
+   SESSÃO (CORRIGIDO)
 ========================= */
 app.use(session({
   store: new PgSession({
@@ -55,14 +55,15 @@ app.use(session({
     tableName: "session",
     createTableIfMissing: true
   }),
-  secret: process.env.SESSION_SECRET || "fallback_secret",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
 
-    // 🔥 ESSENCIAL PARA DISCORD + RENDER
+    // 🔥 IMPORTANTE PARA DISCORD + RENDER
     secure: true,
     sameSite: "none"
   }
@@ -80,7 +81,7 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, "../public")));
 
 /* =========================
-   ROTAS
+   ROTAS API
 ========================= */
 app.use("/auth", authRoutes);
 app.use("/api/guilds", guildRoutes);
@@ -93,26 +94,43 @@ app.use("/api/user", userRoutes);
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
-    bot: "Crina",
+    bot: "Kryna",
     timestamp: new Date().toISOString()
   });
 });
 
 /* =========================
-   CALLBACK DEBUG (OPCIONAL MAS MUITO ÚTIL)
+   DEBUG AUTH
 ========================= */
 app.get("/auth/debug", (req, res) => {
   res.json({
-    message: "Auth system running",
-    session: req.session || null,
-    user: req.user || null
+    authenticated: req.isAuthenticated?.() || false,
+    user: req.user || null,
+    session: req.session || null
   });
 });
 
 /* =========================
-   FALLBACK (SPA)
+   🔥 PROTEÇÃO DO CALLBACK (CRÍTICO)
 ========================= */
-app.get("*", (req, res) => {
+app.get("/auth/discord/callback",
+  passport.authenticate("discord", {
+    failureRedirect: "/?erro=login_falhou"
+  }),
+  (req, res) => {
+    // login OK → manda pro dashboard
+    res.redirect(`${process.env.DASHBOARD_URL}/painel.html`);
+  }
+);
+
+/* =========================
+   SPA FALLBACK (CORRIGIDO)
+   NÃO INTERCEPTA /auth
+========================= */
+app.get("*", (req, res, next) => {
+  if (req.originalUrl.startsWith("/auth")) return next();
+  if (req.originalUrl.startsWith("/api")) return next();
+
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
@@ -125,14 +143,14 @@ async function start() {
     await startBot();
 
     app.listen(PORT, () => {
-      console.log(`\n╔══════════════════════════════════════╗`);
-      console.log(`║   🌸 Kryna Dashboard rodando!       ║`);
-      console.log(`║   PORTA: ${PORT}                   ║`);
-      console.log(`╚══════════════════════════════════════╝\n`);
+      console.log(`\n╔══════════════════════════════╗`);
+      console.log(`║   🌸 Kryna Dashboard OK      ║`);
+      console.log(`║   PORT: ${PORT}              ║`);
+      console.log(`╚══════════════════════════════╝\n`);
     });
 
   } catch (err) {
-    console.error("[SERVER] Erro fatal ao iniciar:", err);
+    console.error("[SERVER] Erro fatal:", err);
     process.exit(1);
   }
 }
