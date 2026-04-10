@@ -4,7 +4,12 @@
 require('dotenv').config();
 
 const express       = require('express');
-const session       = require('express-session');
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+
 const PgSession     = require('connect-pg-simple')(session);
 const passport      = require('./auth/passport');
 const helmet        = require('helmet');
