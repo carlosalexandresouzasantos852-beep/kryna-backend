@@ -57,7 +57,7 @@ passport.use(new DiscordStrategy(
 
       return done(null, user);
     } catch (err) {
-      console.error('[Passport] Erro ao salvar usuário:', err.message);
+      console.error('[Passport] ERRO COMPLETO:', err);
       return done(err, null);
     }
   }
