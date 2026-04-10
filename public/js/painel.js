@@ -681,7 +681,7 @@ async function loadApiKey() {
 function updateApiKeyDisplay() {
   const el = document.getElementById('api-key-val');
   if (!el) return;
-  el.textContent = apiVisible ? realApiKey : 'crina_sk_' + '●'.repeat(24);
+  el.textContent = apiVisible ? realApiKey : 'kryna_sk_' + '●'.repeat(24);
 }
 
 function toggleApiKey() {
